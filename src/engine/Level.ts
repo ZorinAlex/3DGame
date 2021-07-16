@@ -1,10 +1,9 @@
 import * as BABYLON from 'babylonjs';
-import Player from "./Player";
-import CharacterControllerInput from "./Character/CharacterControllerInput";
+import Character from './Character/Character';
 
 export default class Level {
 	private name: string;
-	private player: Player;
+	private player: Character;
 	private canvas: HTMLCanvasElement;
 	private scene: BABYLON.Scene;
 	private skybox: BABYLON.Mesh;
@@ -37,9 +36,8 @@ export default class Level {
 	}
 
 	public addPlayer() {
-		this.player = new Player(this.scene, this.canvas);
+		this.player = new Character(this.scene, this.canvas);
 		this.scene.activeCamera = this.player.camera;
-		let ss = new CharacterControllerInput(this.scene);
 	}
 
 	public setSkybox () {

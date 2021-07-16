@@ -1,15 +1,25 @@
 import { ExecuteCodeAction, Scene, ActionManager } from "babylonjs";
 
+interface IKeys {
+    forward: boolean,
+    backward: boolean,
+    left: boolean,
+    right: boolean,
+    space: boolean,
+    shift: boolean
+}
 
 export default class CharacterControllerInput {
-    private _keys: Object;
+    private _keys: IKeys;
     private _inputMap: Object = {};
-    private _controlled: any;
     private _scene: Scene;
-    constructor(scene: Scene) {
+    public onKeyUpCallback: Function;
+    constructor(scene: Scene, onKeyUpCallback: Function) {
         this._scene = scene;
+        this.onKeyUpCallback = onKeyUpCallback;
         this.init();
     }
+
     protected init(){
         this._keys = {
             forward: false,
@@ -31,8 +41,61 @@ export default class CharacterControllerInput {
 
     protected onKeyDown(key: string){
         console.log('DOWN:', key);
+        switch (key) {
+            case "KeyW":
+            case "ArrowUp":
+                this._keys.forward = true;
+                break;
+            case "KeyS":
+            case "ArrowDown":
+                this._keys.backward = true;
+                break;
+            case "KeyA":
+            case "ArrowLeft":
+                this._keys.left = true;
+                break;
+            case "KeyD":
+            case "ArrowRight":
+                this._keys.right = true;
+                break;
+            case "Space":
+                this._keys.space = true;
+                break;
+            case "Shift":
+                this._keys.shift = true;
+                break;
+        }
     }
     protected onKeyUp(key: string){
         console.log('UP:', key);
+        switch (key) {
+            case "KeyW":
+            case "ArrowUp":
+                this._keys.forward = false;
+                break;
+            case "KeyS":
+            case "ArrowDown":
+                this._keys.backward = false;
+                break;
+            case "KeyA":
+            case "ArrowLeft":
+                this._keys.left = false;
+                break;
+            case "KeyD":
+            case "ArrowRight":
+                this._keys.right = false;
+                break;
+            case "Space":
+                this._keys.space = false;
+                break;
+            case "Shift":
+                this._keys.shift = false;
+                break;
+        }
+        this.onKeyUpCallback(key);
+    }
+
+    public getKey() : IKeys {
+        return this._keys;
     }
 }
