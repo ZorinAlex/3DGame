@@ -119,19 +119,19 @@ export default class CharacterController {
         this.characterLookPositionToCamera();
         this.checkOnGround();
         if (this._input.getKey().forward) {
-            this._characterMesh.moveWithCollisions(new Vector3(Math.cos(this._characterCamera.alpha) * -1 * this._characterSpeed, 0, Math.sin(this._characterCamera.alpha) * -1 * this._characterSpeed));
+            this._characterMesh.moveWithCollisions(new Vector3(this._characterMesh.forward.x * this._characterSpeed, 0, this._characterMesh.forward.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RUN);
         }
         if (this._input.getKey().backward) {
-            this._characterMesh.moveWithCollisions(new Vector3(Math.cos(this._characterCamera.alpha) * 1 * this._characterSpeed, 0, Math.sin(this._characterCamera.alpha) * 1 * this._characterSpeed));
+            this._characterMesh.moveWithCollisions(new Vector3(-this._characterMesh.forward.x * this._characterSpeed, 0, -this._characterMesh.forward.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RUN);
         }
         if (this._input.getKey().left) {
-            this._characterMesh.moveWithCollisions(new Vector3(Math.cos(this._characterCamera.alpha + Math.PI / 2) * -1 * this._characterSpeed, 0, Math.sin(this._characterCamera.alpha + Math.PI / 2) * -1 * this._characterSpeed));
+            this._characterMesh.moveWithCollisions(new Vector3(this._characterMesh.right.x * this._characterSpeed, 0, this._characterMesh.right.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.LEFT);
         }
         if (this._input.getKey().right) {
-            this._characterMesh.moveWithCollisions(new Vector3(Math.cos(this._characterCamera.alpha + Math.PI / 2) * 1 * this._characterSpeed, 0, Math.sin(this._characterCamera.alpha + Math.PI / 2) * 1 * this._characterSpeed));
+            this._characterMesh.moveWithCollisions(new Vector3(-this._characterMesh.right.x * this._characterSpeed, 0, -this._characterMesh.right.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RIGHT);
         }
         if (this._input.getKey().space){
