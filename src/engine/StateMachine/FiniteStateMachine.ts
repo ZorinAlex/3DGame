@@ -29,6 +29,10 @@ export default class FiniteStateMachine {
         }
     }
 
+    getState(){
+        return this._currentState;
+    }
+
     update() {
         if(!_.isNil(this._currentState)){
             this._currentState.update();
