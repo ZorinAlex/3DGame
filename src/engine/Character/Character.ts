@@ -1,4 +1,4 @@
-import { Scene, Mesh, ArcRotateCamera, Vector3 } from "babylonjs";
+import { Scene, Mesh, Vector3, UniversalCamera, ArcRotateCamera, TransformNode } from "babylonjs";
 import AnimationsController from "../Animations/AnimationsController";
 import * as BABYLON from "babylonjs";
 import * as _ from "lodash";
@@ -66,10 +66,32 @@ export default class Character{
         this._characterMesh.checkCollisions = true;
         this._characterMesh.isPickable = false;
         this._characterMesh.ellipsoid = new Vector3(0.5, 1, 0.2);
-        this._characterMesh.ellipsoidOffset = new Vector3(0, 1, 0);
-        this.drawEllipsoid(this._characterMesh);
+        this._characterMesh.ellipsoidOffset = new Vector3(0, this._characterMesh.ellipsoid.y, 0);
+        //this.drawEllipsoid(this._characterMesh);
     }
 
+    protected addCamera1() {
+        //root camera parent that handles positioning of the camera to follow the player
+        let camRoot: TransformNode = new TransformNode("root");
+        camRoot.position = new Vector3(0, 0, 0); //initialized at (0,0,0)
+        //to face the player from behind (180 degrees)
+        camRoot.rotation = new Vector3(0, Math.PI, 0);
+
+        //rotations along the x-axis (up/down tilting)
+        let yTilt = new TransformNode("ytilt");
+        //adjustments to camera view to point down at our player
+        yTilt.rotation = new Vector3(0.5934119456780721, 0, 0);
+        yTilt.parent = camRoot;
+
+        //our actual camera that's pointing at our root's position
+        //this._characterCamera = new UniversalCamera("cam", new Vector3(0, 0, -30), this._scene);
+        //this._characterCamera.lockedTarget = camRoot.position;
+        this._characterCamera.fov = 0.47350045992678597;
+        this._characterCamera.parent = yTilt;
+
+        this._characterCamera.attachControl(this._canvas, false);
+
+    }
     protected addCamera() {
         let alpha = -this._characterMesh.rotation.y - 4.69;
         let beta = Math.PI / 2.5;
@@ -82,21 +104,25 @@ export default class Character{
             target,
             this._scene
         );
-        this._characterCamera.wheelPrecision = 15;
+        this._characterCamera.wheelPrecision = 20;
         this._characterCamera.checkCollisions = false;
         this._characterCamera.keysLeft = [];
         this._characterCamera.keysRight = [];
         this._characterCamera.keysUp = [];
         this._characterCamera.keysDown = [];
-        this._characterCamera.lowerRadiusLimit = 2;
-        this._characterCamera.upperRadiusLimit = 20;
+        this._characterCamera.lowerRadiusLimit = 3;
+        this._characterCamera.upperRadiusLimit = 7;
+        this._characterCamera.lowerBetaLimit = 0.8;
+        this._characterCamera.upperBetaLimit = 1.3;
+        this._characterCamera.angularSensibilityX=2000;
+        this._characterCamera.angularSensibilityY=10000;
         this._characterCamera.attachControl(this._canvas, false);
     }
     // only for debug ellipsoid
     protected drawEllipsoid(mesh) {
         mesh.computeWorldMatrix(true);
         let ellipsoidMat = mesh.getScene().getMaterialByName("__ellipsoidMat__");
-        if (!ellipsoidMat) {
+        if (! ellipsoidMat) {
             ellipsoidMat = new BABYLON.StandardMaterial("__ellipsoidMat__", mesh.getScene());
             ellipsoidMat.wireframe = true;
             ellipsoidMat.emissiveColor = BABYLON.Color3.Green();
@@ -109,6 +135,7 @@ export default class Character{
         ellipsoid.scaling.z *= 2;
         ellipsoid.material = ellipsoidMat;
         ellipsoid.parent = mesh;
+        ellipsoid.position = mesh.ellipsoidOffset.clone();
         ellipsoid.computeWorldMatrix(true);
     }
 }

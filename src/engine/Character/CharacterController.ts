@@ -1,7 +1,7 @@
 import CharacterControllerInput from "./CharacterControllerInput";
 import FiniteStateMachine from "../StateMachine/FiniteStateMachine";
 import {CharacterStateNames} from "./misc/CharacterStateNames";
-import { Scene, Mesh, ArcRotateCamera,Vector3, Ray, RayHelper, Color3 } from "babylonjs";
+import { Scene, Mesh, ArcRotateCamera,Vector3, Ray, RayHelper, Color3, UniversalCamera } from "babylonjs";
 import * as _ from 'lodash';
 
 export default class CharacterController {
@@ -53,6 +53,7 @@ export default class CharacterController {
         this.initBottomRay();
         this.initTopRay();
         this._scene.onBeforeRenderObservable.add(this.update.bind(this));
+        this._characterCamera.setTarget(this._characterMesh.position);
     }
 
     protected initTopRay(){
@@ -103,10 +104,8 @@ export default class CharacterController {
     }
 
     protected characterLookPositionToCamera() {
-        let focus = this._characterCamera.getFrontPosition(100);
-        focus.y = 0;
-        focus.multiplyInPlace(new Vector3(-1, -1, -1));
-        this._characterMesh.lookAt(focus);
+        const camAng = -this._characterCamera.alpha - BABYLON.Tools.ToDegrees(40);
+        this._characterMesh.rotation = new Vector3(0, camAng, 0);
     }
 
     protected onKeyUp(key: string){
@@ -121,16 +120,13 @@ export default class CharacterController {
         if (this._input.getKey().forward) {
             this._characterMesh.moveWithCollisions(new Vector3(this._characterMesh.forward.x * this._characterSpeed, 0, this._characterMesh.forward.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RUN);
-        }
-        if (this._input.getKey().backward) {
+        }else if (this._input.getKey().backward) {
             this._characterMesh.moveWithCollisions(new Vector3(-this._characterMesh.forward.x * this._characterSpeed, 0, -this._characterMesh.forward.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RUN);
-        }
-        if (this._input.getKey().left) {
+        }else if (this._input.getKey().left) {
             this._characterMesh.moveWithCollisions(new Vector3(this._characterMesh.right.x * this._characterSpeed, 0, this._characterMesh.right.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.LEFT);
-        }
-        if (this._input.getKey().right) {
+        }else if (this._input.getKey().right) {
             this._characterMesh.moveWithCollisions(new Vector3(-this._characterMesh.right.x * this._characterSpeed, 0, -this._characterMesh.right.z * this._characterSpeed));
             this._stateMachine.setState(CharacterStateNames.RIGHT);
         }
@@ -159,6 +155,6 @@ export default class CharacterController {
         if(this._onGround && this._stateMachine.getState().name === CharacterStateNames.FALL){
             this._stateMachine.setState(CharacterStateNames.IDLE);
         }
-        this._characterCamera.setTarget(this._characterMesh.position);
+        //this._characterCamera.setTarget(this._characterMesh.position);
     }
 }
