@@ -1,4 +1,4 @@
-import { Scene, Mesh, Vector3, UniversalCamera, ArcRotateCamera, TransformNode } from "babylonjs";
+import { Scene, Mesh, Vector3, UniversalCamera, ArcRotateCamera, TransformNode, Ray } from "babylonjs";
 import AnimationsController from "../Animations/AnimationsController";
 import * as BABYLON from "babylonjs";
 import * as _ from "lodash";
@@ -11,6 +11,10 @@ import LeftState from "./CharacterStates/LeftState";
 import RightState from "./CharacterStates/RightState";
 import JumpState from "./CharacterStates/JumpState";
 import FallState from "./CharacterStates/FallState";
+import CharacterControllerInput from "./CharacterControllerInput";
+import CharacterProxy from "./CharacterProxy";
+import CharacterMovement from "./CharacterMovement";
+
 
 export default class Character{
     private _characterMesh: Mesh;
@@ -20,6 +24,9 @@ export default class Character{
     private _characterStateMachine: FiniteStateMachine;
     private _characterAnimationController: AnimationsController;
     private _characterController: CharacterController;
+    private _characterControllerInput: CharacterControllerInput;
+    private _characterMovement: CharacterMovement;
+    private _characterProxy: CharacterProxy;
 
     constructor(scene: Scene, canvas: HTMLCanvasElement){
         this._scene = scene;
@@ -37,17 +44,20 @@ export default class Character{
         this.addAnimations();
         this.addCamera();
         this._characterStateMachine = new FiniteStateMachine();
+        this._characterControllerInput = new CharacterControllerInput(this._scene);
+        this._characterMovement = new CharacterMovement(0.2,-1.2,0.4,this._characterMesh, this._scene);
+        this._characterProxy = new CharacterProxy(this._characterStateMachine, this._characterAnimationController, this._characterControllerInput, this._characterMovement);
         this.addStates();
         this._characterController = new CharacterController(this._scene, this._characterMesh, this._characterCamera, this._characterStateMachine);
     }
 
     protected addStates(){
-        this._characterStateMachine.addState(new IdleState(CharacterStateNames.IDLE, this._characterAnimationController));
-        this._characterStateMachine.addState(new RunState(CharacterStateNames.RUN, this._characterAnimationController));
-        this._characterStateMachine.addState(new LeftState(CharacterStateNames.LEFT, this._characterAnimationController));
-        this._characterStateMachine.addState(new RightState(CharacterStateNames.RIGHT, this._characterAnimationController));
-        this._characterStateMachine.addState(new JumpState(CharacterStateNames.JUMP, this._characterAnimationController));
-        this._characterStateMachine.addState(new FallState(CharacterStateNames.FALL, this._characterAnimationController));
+        this._characterStateMachine.addState(new IdleState(CharacterStateNames.IDLE, this._characterProxy));
+        this._characterStateMachine.addState(new RunState(CharacterStateNames.RUN, this._characterProxy));
+        this._characterStateMachine.addState(new LeftState(CharacterStateNames.LEFT, this._characterProxy));
+        this._characterStateMachine.addState(new RightState(CharacterStateNames.RIGHT, this._characterProxy));
+        this._characterStateMachine.addState(new JumpState(CharacterStateNames.JUMP, this._characterProxy));
+        this._characterStateMachine.addState(new FallState(CharacterStateNames.FALL, this._characterProxy));
     }
 
     protected addAnimations(){
@@ -60,7 +70,9 @@ export default class Character{
     }
 
     protected async addCharacter(){
+        //TODO why its not works with Character??????????
         this._characterMesh = this._scene.getMeshByID('__root__') as Mesh;
+        (this._scene.getMeshByID('Character') as Mesh).isPickable = false;
         this._characterMesh.scaling.scaleInPlace(1);
         this._characterMesh.position.y = 1;
         this._characterMesh.checkCollisions = true;
@@ -70,28 +82,6 @@ export default class Character{
         //this.drawEllipsoid(this._characterMesh);
     }
 
-    protected addCamera1() {
-        //root camera parent that handles positioning of the camera to follow the player
-        let camRoot: TransformNode = new TransformNode("root");
-        camRoot.position = new Vector3(0, 0, 0); //initialized at (0,0,0)
-        //to face the player from behind (180 degrees)
-        camRoot.rotation = new Vector3(0, Math.PI, 0);
-
-        //rotations along the x-axis (up/down tilting)
-        let yTilt = new TransformNode("ytilt");
-        //adjustments to camera view to point down at our player
-        yTilt.rotation = new Vector3(0.5934119456780721, 0, 0);
-        yTilt.parent = camRoot;
-
-        //our actual camera that's pointing at our root's position
-        //this._characterCamera = new UniversalCamera("cam", new Vector3(0, 0, -30), this._scene);
-        //this._characterCamera.lockedTarget = camRoot.position;
-        this._characterCamera.fov = 0.47350045992678597;
-        this._characterCamera.parent = yTilt;
-
-        this._characterCamera.attachControl(this._canvas, false);
-
-    }
     protected addCamera() {
         let alpha = -this._characterMesh.rotation.y - 4.69;
         let beta = Math.PI / 2.5;

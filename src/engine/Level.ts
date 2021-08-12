@@ -22,13 +22,6 @@ export default class Level {
 		this.addLight();
 	}
 
-	// public load() {
-	// 	BABYLON.SceneLoader.Append('/assets/levels/', `${this.name}.babylon`, this.scene, (scene) => {
-	// 		let ambientLight = new BABYLON.HemisphericLight('ambientLight', new BABYLON.Vector3(0, 1, 0), this.scene);
-	// 		ambientLight.intensity = .1;
-	// 	})
-	// }
-
 	public render() {
 		this.scene.render();
 	}
@@ -48,9 +41,7 @@ export default class Level {
         skyboxMaterial.backFaceCulling = false;
         skyboxMaterial.disableLighting = true;
         //TODO get texture id somewhere :D
-		skyboxMaterial.reflectionTexture = this.scene.getTextureByUniqueID(0)
-
-        //skyboxMaterial.reflectionTexture = new CubeTexture("/assets/skybox/SpecularHDR.dds", this.scene);
+		skyboxMaterial.reflectionTexture = this.scene.getTextureByUniqueID(0);
         skyboxMaterial.reflectionTexture.coordinatesMode = Texture.SKYBOX_MODE;
 	}
 

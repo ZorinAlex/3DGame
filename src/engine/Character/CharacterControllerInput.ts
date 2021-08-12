@@ -1,4 +1,5 @@
 import { ExecuteCodeAction, Scene, ActionManager } from "babylonjs";
+import * as _ from 'lodash';
 
 interface IKeys {
     forward: boolean,
@@ -14,7 +15,7 @@ export default class CharacterControllerInput {
     private _inputMap: Object = {};
     private _scene: Scene;
     public onKeyUpCallback: Function;
-    constructor(scene: Scene, onKeyUpCallback: Function) {
+    constructor(scene: Scene, onKeyUpCallback?: Function) {
         this._scene = scene;
         this.onKeyUpCallback = onKeyUpCallback;
         this.init();
@@ -39,23 +40,34 @@ export default class CharacterControllerInput {
         }));
     }
 
+    protected clearKeys(){
+        this._keys.forward = false;
+        this._keys.backward = false;
+        this._keys.right = false;
+        this._keys.left = false;
+    }
+
     protected onKeyDown(key: string){
         console.log('DOWN:', key);
         switch (key) {
             case "KeyW":
             case "ArrowUp":
+                this.clearKeys();
                 this._keys.forward = true;
                 break;
             case "KeyS":
             case "ArrowDown":
+                this.clearKeys();
                 this._keys.backward = true;
                 break;
             case "KeyA":
             case "ArrowLeft":
+                this.clearKeys();
                 this._keys.left = true;
                 break;
             case "KeyD":
             case "ArrowRight":
+                this.clearKeys();
                 this._keys.right = true;
                 break;
             case "Space":
@@ -92,10 +104,21 @@ export default class CharacterControllerInput {
                 this._keys.shift = false;
                 break;
         }
-        this.onKeyUpCallback(key);
+        if(!_.isNil(this.onKeyUpCallback)){
+            this.onKeyUpCallback(key);
+        }
     }
 
     public getKey() : IKeys {
         return this._keys;
+    }
+
+    public noKeysDown(): boolean {
+        for (let key in this._keys) {
+            if (this._keys[key] === true) {
+                return false
+            }
+        }
+        return true;
     }
 }
