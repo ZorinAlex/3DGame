@@ -34,6 +34,10 @@ export default class Character{
         this.init();
     }
 
+    public get mesh(){
+        return this._characterMesh;
+    }
+
     public get camera(){
         return this._characterCamera;
     }
@@ -74,7 +78,14 @@ export default class Character{
         this._characterMesh = this._scene.getMeshByID('__root__') as Mesh;
         (this._scene.getMeshByID('Character') as Mesh).isPickable = false;
         this._characterMesh.scaling.scaleInPlace(1);
-        this._characterMesh.position.y = 1;
+        let start_pos = this._scene.getMeshByName('player_start');
+        console.log(start_pos);
+        if(!_.isNil(start_pos)){
+            this._characterMesh.position.y = start_pos.position.y;
+            this._characterMesh.position.x = start_pos.position.x;
+            this._characterMesh.position.z = start_pos.position.z;
+            this._scene.removeMesh(start_pos);
+        }
         this._characterMesh.checkCollisions = true;
         this._characterMesh.isPickable = false;
         this._characterMesh.ellipsoid = new Vector3(0.5, 1, 0.2);

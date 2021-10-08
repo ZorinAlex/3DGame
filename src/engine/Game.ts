@@ -31,6 +31,7 @@ export default class Game {
 
 	public async startLevel (name) {
 		let loader = new Loader(this.scene);
+		await loader.loadLevel();
 		await loader.loadAssets();
 		this.level = new Level(name, this.engine, this.canvas, this.scene);
 		this.render();

@@ -110,7 +110,7 @@ export default class CharacterMovement {
         targetPoint.y -= 1;
         const direction = targetPoint.subtract(origin);
         direction.normalize();
-        const length = 0.2;
+        const length = 0.5;
         this._bottomRay = new Ray(origin, direction, length);
         //RayHelper.CreateAndShow(this.bottomRay, this._scene, new Color3(1, 1, 0.1));
     }
